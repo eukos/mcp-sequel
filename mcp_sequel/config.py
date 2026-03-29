@@ -26,6 +26,16 @@ def config_dir() -> Path:
     return Path.home() / ".config" / "mcp-sequel"
 
 
+def load_one(name: str) -> "ConnectionConfig | None":
+    path = config_dir() / f"{name}.json"
+    if not path.exists():
+        return None
+    from pydantic import TypeAdapter
+
+    adapter = TypeAdapter(ConnectionConfig)
+    return adapter.validate_json(path.read_text())
+
+
 def load_all() -> list[tuple[str, ConnectionConfig]]:
     """Return [(name, config), ...] for all valid .json files in the config dir."""
     directory = config_dir()
