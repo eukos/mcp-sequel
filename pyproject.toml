@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-sequel"
+version = "0.1.0"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+dependencies = [
+    "mcp[cli]>=1.0",
+    "mysql-connector-python>=8.0",
+    "sqlglot>=20.0",
+    "pydantic>=2.0",
+]
+
+[project.scripts]
+mcp-sequel = "mcp_sequel.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mcp_sequel"]
