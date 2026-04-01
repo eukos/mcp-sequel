@@ -1,20 +1,14 @@
-import datetime
-import decimal
 from typing import Any
 
 import mysql.connector
+import sqlglot
 
-from mcp_sequel.adapters.base import BaseAdapter, QueryResult
-
-
-def _serialize(value: Any) -> Any:
-    if isinstance(value, (datetime.date, datetime.datetime, datetime.timedelta)):
-        return str(value)
-    if isinstance(value, decimal.Decimal):
-        return str(value)
-    if isinstance(value, bytes):
-        return value.hex()
-    return value
+from mcp_sequel.adapters.base import (
+    BaseAdapter,
+    QueryResult,
+    ReadonlyViolationError,
+    _serialize,
+)
 
 
 class MySQLAdapter(BaseAdapter):
@@ -23,6 +17,17 @@ class MySQLAdapter(BaseAdapter):
     def __init__(self, config: Any) -> None:
         super().__init__(config)
         self.sqlglot_dialect = config.type  # "mysql" or "mariadb"
+
+    def guard_readonly(self, sql: str) -> None:
+        stmts = sqlglot.parse(sql, dialect=self.sqlglot_dialect)
+        if not stmts:
+            raise ReadonlyViolationError("could not parse SQL")
+        for stmt in stmts:
+            stmt_type = type(stmt).__name__.upper()
+            if stmt_type not in self.ALLOWED_STATEMENTS:
+                raise ReadonlyViolationError(
+                    f"{stmt_type} statement is not allowed in readonly mode"
+                )
 
     def connect(self) -> Any:
         return mysql.connector.connect(

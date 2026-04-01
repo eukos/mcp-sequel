@@ -1,10 +1,16 @@
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, Field, ValidationError
 
 
-class MySQLConfig(BaseModel):
+class BaseConnectionConfig(BaseModel):
+    @property
+    def location(self) -> str:
+        raise NotImplementedError
+
+
+class MySQLConfig(BaseConnectionConfig):
     type: Literal["mysql", "mariadb"]
     host: str
     port: int = 3306
@@ -15,9 +21,29 @@ class MySQLConfig(BaseModel):
     row_limit: int | None = 1000
     description: str | None = None
 
+    @property
+    def location(self) -> str:
+        host = self.host if self.port == 3306 else f"{self.host}:{self.port}"
+        loc = f"{self.user}@{host}"
+        if self.database:
+            loc += f"/{self.database}"
+        return loc
+
+
+class SQLiteConfig(BaseConnectionConfig):
+    type: Literal["sqlite"]
+    path: str
+    readonly: bool = True
+    row_limit: int | None = 1000
+    description: str | None = None
+
+    @property
+    def location(self) -> str:
+        return self.path
+
 
 ConnectionConfig = Annotated[
-    MySQLConfig,
+    Union[MySQLConfig, SQLiteConfig],
     Field(discriminator="type"),
 ]
 

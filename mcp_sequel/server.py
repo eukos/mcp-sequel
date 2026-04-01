@@ -3,11 +3,11 @@ import json
 import sqlglot
 from mcp.server.fastmcp import FastMCP
 
+from mcp_sequel.adapters.base import ReadonlyViolationError
 from mcp_sequel.config import load_all
 from mcp_sequel.pool import get_connection
-from mcp_sequel.query_guard import ReadonlyViolationError, check_readonly
 
-mcp = FastMCP("mcp-sequel")
+mcp = FastMCP("mcp-sequel", instructions="MySQL database query tool")
 
 
 def _is_select_without_limit(sql: str, dialect: str) -> bool:
@@ -33,13 +33,9 @@ def list_connections() -> str:
 
     blocks = []
     for name, cfg in connections:
-        host = cfg.host if cfg.port == 3306 else f"{cfg.host}:{cfg.port}"
-        location = f"{cfg.user}@{host}"
-        if cfg.database:
-            location += f"/{cfg.database}"
         readonly = "yes" if cfg.readonly else "no"
 
-        header = f"{name} ({location}) [{cfg.type}], readonly: {readonly}"
+        header = f"{name} ({cfg.location}) [{cfg.type}], readonly: {readonly}"
         if cfg.description:
             blocks.append(f"{header}\n  {cfg.description}")
         else:
@@ -55,7 +51,7 @@ def query(connection: str, sql: str, database: str | None = None) -> str:
         cfg, adapter, conn = get_connection(connection)
 
         if cfg.readonly:
-            check_readonly(sql, adapter)
+            adapter.guard_readonly(sql)
 
         actual_sql = sql
         limit_applied = None
