@@ -9,6 +9,7 @@ from mcp_sequel.adapters.base import (
     ReadonlyViolationError,
     _serialize,
 )
+from mcp_sequel.tunnel import close_tunnel, open_tunnel
 
 
 class MySQLAdapter(BaseAdapter):
@@ -17,6 +18,7 @@ class MySQLAdapter(BaseAdapter):
     def __init__(self, config: Any) -> None:
         super().__init__(config)
         self.sqlglot_dialect = config.type  # "mysql" or "mariadb"
+        self._tunnel: Any = None
 
     def guard_readonly(self, sql: str) -> None:
         stmts = sqlglot.parse(sql, dialect=self.sqlglot_dialect)
@@ -30,9 +32,22 @@ class MySQLAdapter(BaseAdapter):
                 )
 
     def connect(self) -> Any:
+        if self.config.ssh_tunnel:
+            self._tunnel = open_tunnel(
+                self.config.ssh_tunnel,
+                self.config.host,
+                self.config.port,
+            )
+            host = "127.0.0.1"
+            port = self._tunnel.local_bind_port
+        else:
+            self._tunnel = None
+            host = self.config.host
+            port = self.config.port
+
         return mysql.connector.connect(
-            host=self.config.host,
-            port=self.config.port,
+            host=host,
+            port=port,
             user=self.config.user,
             password=self.config.password,
             database=self.config.database or None,
@@ -64,3 +79,6 @@ class MySQLAdapter(BaseAdapter):
 
     def close(self, conn: Any) -> None:
         conn.close()
+        if self._tunnel is not None:
+            close_tunnel(self._tunnel)
+            self._tunnel = None

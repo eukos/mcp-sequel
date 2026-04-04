@@ -57,6 +57,56 @@ Each file is one connection. Examples:
 | `readonly`    | no       | `true`  | if true, only SELECT/SHOW/DESCRIBE/EXPLAIN are allowed |
 | `row_limit`   | no       | `1000`  | max rows returned; `null` for no limit                 |
 | `description` | no       | —       | human-readable label shown in `list_connections`       |
+| `ssh_tunnel`  | no       | —       | SSH tunnel config (see below); routes the connection through a bastion host |
+
+**MySQL via SSH tunnel**
+
+Use `ssh_tunnel` when the database is only reachable through a bastion/jump host. `host` and `port` in the top-level config refer to the DB as seen **from the SSH server** (commonly `localhost`).
+
+With a key file (most common):
+
+```json
+{
+  "type": "mysql",
+  "host": "localhost",
+  "port": 3306,
+  "user": "reader",
+  "password": "secret",
+  "database": "myapp",
+  "ssh_tunnel": {
+    "host": "bastion.example.com",
+    "user": "ubuntu",
+    "key_file": "~/.ssh/id_rsa"
+  }
+}
+```
+
+With an SSH password:
+
+```json
+{
+  "type": "mysql",
+  "host": "localhost",
+  "port": 3306,
+  "user": "reader",
+  "password": "secret",
+  "ssh_tunnel": {
+    "host": "bastion.example.com",
+    "user": "ubuntu",
+    "password": "sshpass"
+  }
+}
+```
+
+| Field      | Required | Default | Description                             |
+|------------|----------|---------|-----------------------------------------|
+| `host`     | yes      | —       | SSH server hostname or IP               |
+| `user`     | yes      | —       | SSH username                            |
+| `key_file` | no\*     | —       | path to private key file (`~` expanded) |
+| `password` | no\*     | —       | SSH password (if not using key file)    |
+| `port`     | no       | `22`    | SSH server port                         |
+
+\* at least one of `key_file` or `password` should be provided.
 
 **SQLite**
 

@@ -10,6 +10,14 @@ class BaseConnectionConfig(BaseModel):
         raise NotImplementedError
 
 
+class SSHTunnelConfig(BaseModel):
+    host: str
+    port: int = 22
+    user: str
+    key_file: str | None = None
+    password: str | None = None
+
+
 class MySQLConfig(BaseConnectionConfig):
     type: Literal["mysql", "mariadb"]
     host: str
@@ -20,6 +28,7 @@ class MySQLConfig(BaseConnectionConfig):
     readonly: bool = True
     row_limit: int | None = 1000
     description: str | None = None
+    ssh_tunnel: SSHTunnelConfig | None = None
 
     @property
     def location(self) -> str:
@@ -27,6 +36,10 @@ class MySQLConfig(BaseConnectionConfig):
         loc = f"{self.user}@{host}"
         if self.database:
             loc += f"/{self.database}"
+        if self.ssh_tunnel:
+            ssh = self.ssh_tunnel
+            ssh_host = ssh.host if ssh.port == 22 else f"{ssh.host}:{ssh.port}"
+            loc = f"{ssh.user}@{ssh_host} -> {loc}"
         return loc
 
 

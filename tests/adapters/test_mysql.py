@@ -1,5 +1,5 @@
 import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -92,3 +92,93 @@ def test_execute_empty_result(adapter):
     assert result.columns == []
     assert result.rows == []
     assert result.row_count == 0
+
+
+# --- tunnel integration ---
+
+
+class _FullConfig:
+    """Config with all fields needed by connect()."""
+
+    readonly = True
+    row_limit = None
+    type = "mysql"
+    host = "db.internal"
+    port = 3306
+    user = "root"
+    password = "secret"
+    database = None
+    ssh_tunnel = None
+
+
+class _FullConfigWithTunnel(_FullConfig):
+    ssh_tunnel = MagicMock()  # truthy ssh_tunnel object
+
+
+def test_connect_without_tunnel_uses_config_host_port():
+    adapter = MySQLAdapter(_FullConfig())
+    with patch("mcp_sequel.adapters.mysql.mysql.connector.connect") as mock_connect:
+        mock_connect.return_value = MagicMock()
+        adapter.connect()
+
+    mock_connect.assert_called_once_with(
+        host="db.internal",
+        port=3306,
+        user="root",
+        password="secret",
+        database=None,
+    )
+    assert adapter._tunnel is None
+
+
+def test_connect_with_tunnel_uses_local_bind_port():
+    adapter = MySQLAdapter(_FullConfigWithTunnel())
+    mock_tunnel = MagicMock()
+    mock_tunnel.local_bind_port = 55555
+
+    with (
+        patch(
+            "mcp_sequel.adapters.mysql.open_tunnel", return_value=mock_tunnel
+        ) as mock_open,
+        patch("mcp_sequel.adapters.mysql.mysql.connector.connect") as mock_connect,
+    ):
+        mock_connect.return_value = MagicMock()
+        adapter.connect()
+
+    mock_open.assert_called_once_with(
+        _FullConfigWithTunnel.ssh_tunnel, "db.internal", 3306
+    )
+    mock_connect.assert_called_once_with(
+        host="127.0.0.1",
+        port=55555,
+        user="root",
+        password="secret",
+        database=None,
+    )
+    assert adapter._tunnel is mock_tunnel
+
+
+def test_close_stops_tunnel():
+    adapter = MySQLAdapter(_FullConfigWithTunnel())
+    mock_tunnel = MagicMock()
+    adapter._tunnel = mock_tunnel
+    mock_conn = MagicMock()
+
+    with patch("mcp_sequel.adapters.mysql.close_tunnel") as mock_close:
+        adapter.close(mock_conn)
+
+    mock_conn.close.assert_called_once()
+    mock_close.assert_called_once_with(mock_tunnel)
+    assert adapter._tunnel is None
+
+
+def test_close_without_tunnel_does_not_call_close_tunnel():
+    adapter = MySQLAdapter(_FullConfig())
+    adapter._tunnel = None
+    mock_conn = MagicMock()
+
+    with patch("mcp_sequel.adapters.mysql.close_tunnel") as mock_close:
+        adapter.close(mock_conn)
+
+    mock_conn.close.assert_called_once()
+    mock_close.assert_not_called()
