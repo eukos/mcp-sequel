@@ -19,3 +19,8 @@ mcp-sequel = "mcp_sequel.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["mcp_sequel"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
