@@ -70,7 +70,8 @@ def query(connection: str, sql: str, database: str | None = None) -> str:
                 "rows": result.rows,
                 "row_count": result.row_count,
                 "limit_applied": result.limit_applied,
-            }
+            },
+            ensure_ascii=False,
         )
     except ReadonlyViolationError as e:
         return f"ERROR: readonly violation: {e}"
