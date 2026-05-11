@@ -3,18 +3,13 @@
 MCP server for Claude that connects to MySQL/MariaDB/SQLite databases.
 Supports multiple connections, multiple databases, and readonly mode.
 
-## Install
+## Install & Registration
+
+Clone the repo, then register with Claude:
 
 ```bash
-pip install -e .        # editable, for development
-uvx mcp-sequel          # run directly without installing
-```
-
-## Claude registration
-
-```bash
-claude mcp add --transport stdio mcp-sequel -- uvx mcp-sequel
-claude mcp add mcp-sequel -- uv run --directory /Users/eugenekosyakov/Documents/my/mcp-sequel mcp-sequel
+git clone https://github.com/eukos/mcp-sequel
+claude mcp add mcp-sequel -- uv run --directory /path/to/mcp-sequel mcp-sequel
 ```
 
 ## Configuration

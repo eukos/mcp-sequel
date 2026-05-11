@@ -51,6 +51,7 @@ class MySQLAdapter(BaseAdapter):
             user=self.config.user,
             password=self.config.password,
             database=self.config.database or None,
+            autocommit=True,
         )
 
     def ping(self, conn: Any) -> bool:
