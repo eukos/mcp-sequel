@@ -1,9 +1,10 @@
 # mcp-sequel
 
-MCP server for Claude that connects to MySQL/MariaDB/SQLite databases.
-Supports multiple connections, multiple databases, and readonly mode.
+MCP server for Claude that connects to MySQL, MariaDB, and SQLite databases. Query your databases using natural language. Supports multiple named connections, SSH tunnels, readonly mode, and per-connection row limits.
 
 ## Install & Registration
+
+_Tip: ask Claude to read this README and set up the server for you._
 
 **Option 1: uvx (recommended)** — no installation needed, always runs the latest version:
 
@@ -19,6 +20,8 @@ claude mcp add mcp-sequel uv run --directory /path/to/mcp-sequel mcp-sequel
 ```
 
 ## Configuration
+
+_Tip: ask Claude to read this README and create a connection config for you._
 
 One file per connection in `~/.config/mcp-sequel/`. The filename (without `.json`) becomes the connection name.
 
@@ -134,6 +137,17 @@ Set permissions to owner-only:
 ```bash
 chmod 600 ~/.config/mcp-sequel/*.json
 ```
+
+## Usage
+
+After registering, restart Claude to load the server. Then try:
+
+- "List available database connections"
+- "Show databases for staging"
+- "How many customers do we have on production?"
+- "Show me the schema of the orders table"
+- "Query local: SELECT * FROM users LIMIT 10"
+- "Query production: show me the top 10 users by order count"
 
 ## License
 

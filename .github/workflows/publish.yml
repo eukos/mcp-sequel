@@ -1,4 +1,4 @@
-name: Publish to TestPyPI
+name: Publish to PyPI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: testpypi
+    environment: pypi
     permissions:
       id-token: write
       contents: write
@@ -31,11 +31,9 @@ jobs:
       - name: Build
         if: steps.version.outputs.changed == 'true'
         run: uv build
-      - name: Publish to TestPyPI
+      - name: Publish to PyPI
         if: steps.version.outputs.changed == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
       - name: Tag release
         if: steps.version.outputs.changed == 'true'
         run: |
