@@ -10,6 +10,10 @@ readme = "README.md"
 authors = [{ name = "Eugene Kosyakov", email = "eukos@yandex.by" }]
 requires-python = ">=3.10"
 license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+]
+keywords = ["mcp", "mysql", "mariadb", "sqlite", "claude", "llm", "ai"]
 dependencies = [
     "mcp[cli]>=1.0",
     "mysql-connector-python>=8.0",
