@@ -127,6 +127,7 @@ def test_connect_without_tunnel_uses_config_host_port():
         user="root",
         password="secret",
         database=None,
+        autocommit=True,
     )
     assert adapter._tunnel is None
 
@@ -154,6 +155,7 @@ def test_connect_with_tunnel_uses_local_bind_port():
         user="root",
         password="secret",
         database=None,
+        autocommit=True,
     )
     assert adapter._tunnel is mock_tunnel
 

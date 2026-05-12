@@ -4,8 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-sequel"
-version = "0.1.0"
-requires-python = ">=3.13"
+version = "0.1.1"
+description = "MCP server for SQL databases"
+readme = "README.md"
+authors = [{ name = "Eugene Kosyakov", email = "eukos@yandex.by" }]
+requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
     "mcp[cli]>=1.0",
@@ -15,6 +18,9 @@ dependencies = [
     "sshtunnel>=0.4",
     "paramiko>=2.0,<3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/eukos/mcp-sequel"
 
 [project.scripts]
 mcp-sequel = "mcp_sequel.server:main"
