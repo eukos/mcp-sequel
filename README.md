@@ -5,11 +5,17 @@ Supports multiple connections, multiple databases, and readonly mode.
 
 ## Install & Registration
 
-Clone the repo, then register with Claude:
+**Option 1: uvx (recommended)** — no installation needed, always runs the latest version:
+
+```bash
+claude mcp add mcp-sequel uvx mcp-sequel
+```
+
+**Option 2: from cloned repository:**
 
 ```bash
 git clone https://github.com/eukos/mcp-sequel
-claude mcp add mcp-sequel -- uv run --directory /path/to/mcp-sequel mcp-sequel
+claude mcp add mcp-sequel uv run --directory /path/to/mcp-sequel mcp-sequel
 ```
 
 ## Configuration
