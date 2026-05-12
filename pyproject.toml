@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-sequel"
-version = "0.1.1"
+version = "0.1.0.1"
 description = "MCP server for SQL databases"
 readme = "README.md"
 authors = [{ name = "Eugene Kosyakov", email = "eukos@yandex.by" }]
