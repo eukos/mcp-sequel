@@ -1,4 +1,5 @@
 import json
+from importlib.metadata import PackageNotFoundError, version
 
 import sqlglot
 from mcp.server.fastmcp import FastMCP
@@ -16,6 +17,19 @@ def _is_select_without_limit(sql: str, dialect: str) -> bool:
         return False
     stmt = stmts[0]
     return isinstance(stmt, sqlglot.exp.Select) and stmt.args.get("limit") is None
+
+
+def _get_package_version(package_name: str = "mcp-sequel") -> str:
+    try:
+        return version(package_name)
+    except PackageNotFoundError:
+        return "unknown"
+
+
+@mcp.tool()
+def get_version() -> str:
+    """Return the installed mcp-sequel package version."""
+    return _get_package_version()
 
 
 @mcp.tool()
