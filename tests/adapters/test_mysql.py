@@ -117,7 +117,7 @@ class _FullConfigWithTunnel(_FullConfig):
 
 def test_connect_without_tunnel_uses_config_host_port():
     adapter = MySQLAdapter(_FullConfig())
-    with patch("mcp_sequel.adapters.mysql.mysql.connector.connect") as mock_connect:
+    with patch("mcp_sequel.adapters.mysql.pymysql.connect") as mock_connect:
         mock_connect.return_value = MagicMock()
         adapter.connect()
 
@@ -141,7 +141,7 @@ def test_connect_with_tunnel_uses_local_bind_port():
         patch(
             "mcp_sequel.adapters.mysql.open_tunnel", return_value=mock_tunnel
         ) as mock_open,
-        patch("mcp_sequel.adapters.mysql.mysql.connector.connect") as mock_connect,
+        patch("mcp_sequel.adapters.mysql.pymysql.connect") as mock_connect,
     ):
         mock_connect.return_value = MagicMock()
         adapter.connect()

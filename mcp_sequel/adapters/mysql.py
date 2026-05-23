@@ -1,6 +1,6 @@
 from typing import Any
 
-import mysql.connector
+import pymysql
 import sqlglot
 
 from mcp_sequel.adapters.base import (
@@ -45,7 +45,7 @@ class MySQLAdapter(BaseAdapter):
             host = self.config.host
             port = self.config.port
 
-        return mysql.connector.connect(
+        return pymysql.connect(
             host=host,
             port=port,
             user=self.config.user,
