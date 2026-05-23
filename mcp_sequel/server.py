@@ -8,7 +8,7 @@ from mcp_sequel.adapters.base import ReadonlyViolationError
 from mcp_sequel.config import load_all
 from mcp_sequel.pool import get_connection
 
-mcp = FastMCP("mcp-sequel", instructions="MySQL database query tool")
+mcp = FastMCP("mcp-sequel", instructions="MySQL and SQLite database query tool")
 
 
 def _is_select_without_limit(sql: str, dialect: str) -> bool:
@@ -19,17 +19,13 @@ def _is_select_without_limit(sql: str, dialect: str) -> bool:
     return isinstance(stmt, sqlglot.exp.Select) and stmt.args.get("limit") is None
 
 
-def _get_package_version(package_name: str = "mcp-sequel") -> str:
-    try:
-        return version(package_name)
-    except PackageNotFoundError:
-        return "unknown"
-
-
 @mcp.tool()
 def get_version() -> str:
     """Return the installed mcp-sequel package version."""
-    return _get_package_version()
+    try:
+        return version("mcp-sequel")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 @mcp.tool()
