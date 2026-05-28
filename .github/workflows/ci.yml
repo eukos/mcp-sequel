@@ -5,6 +5,20 @@ on:
     branches: [main]
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check version has no pre-release suffix
+        run: |
+          VERSION=$(grep '^version' pyproject.toml | cut -d'"' -f2)
+          echo "Version: $VERSION"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+(\.[0-9]+)*$'; then
+            echo "ERROR: Version '$VERSION' is not a clean release version (only digits and dots allowed). Remove any pre-release suffix before merging to main."
+            exit 1
+          fi
+          echo "OK: Version '$VERSION' is a clean release version."
+
   check-lock:
     runs-on: ubuntu-latest
     steps:
@@ -15,14 +29,4 @@ jobs:
 
   test:
     needs: check-lock
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-      - name: Run tests
-        run: uv run --python ${{ matrix.python-version }} pytest
+    uses: ./.github/workflows/test.yml
