@@ -19,8 +19,7 @@ dependencies = [
     "pymysql>=1.2",
     "sqlglot>=20.0",
     "pydantic>=2.0",
-    "sshtunnel>=0.4",
-    "paramiko>=2.0,<3.0",
+    "paramiko>=5.0",
 ]
 
 [project.urls]
