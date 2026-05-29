@@ -74,10 +74,12 @@ def open_tunnel(
                 return
             try:
                 transport = client.get_transport()
-                assert transport is not None
+                if transport is None:
+                    raise RuntimeError("SSH transport unavailable")
                 chan = transport.open_channel(
                     "direct-tcpip", (remote_host, remote_port), addr
                 )
+                conn.settimeout(30.0)
                 _handle(chan, conn)
             except Exception:
                 conn.close()
