@@ -1,6 +1,6 @@
 # mcp-sequel
 
-MCP server for Claude that connects to MySQL, MariaDB, and SQLite databases. Query your databases using natural language. Supports multiple named connections, SSH tunnels, readonly mode, and per-connection row limits.
+MCP server for Claude that connects to MySQL, MariaDB, PostgreSQL, and SQLite databases. Query your databases using natural language. Supports multiple named connections, SSH tunnels, readonly mode, and per-connection row limits.
 
 ## Install & Registration
 
@@ -111,6 +111,37 @@ With an SSH password:
 | `port`     | no       | `22`    | SSH server port                         |
 
 \* at least one of `key_file` or `password` should be provided.
+
+**PostgreSQL**
+
+```json
+{
+  "type": "postgresql",
+  "host": "db.example.com",
+  "port": 5432,
+  "user": "analyst",
+  "password": "secret",
+  "database": "myapp",
+  "readonly": true,
+  "row_limit": 1000,
+  "description": "Production PostgreSQL"
+}
+```
+
+| Field         | Required | Default | Description                                                            |
+|---------------|----------|---------|------------------------------------------------------------------------|
+| `type`        | yes      | —       | `"postgresql"`                                                         |
+| `host`        | yes      | —       | hostname or IP                                                         |
+| `user`        | yes      | —       | database user                                                          |
+| `password`    | yes      | —       | database password                                                      |
+| `port`        | no       | `5432`  | TCP port                                                               |
+| `database`    | no*      | —       | database to connect to; can be passed per query instead                |
+| `readonly`    | no       | `true`  | if true, connection is opened in read-only mode (DB-level enforcement) |
+| `row_limit`   | no       | `1000`  | max rows returned; `null` for no limit                                 |
+| `description` | no       | —       | human-readable label shown in `list_connections`                       |
+| `ssh_tunnel`  | no       | —       | SSH tunnel config (same format as MySQL)                               |
+
+\* `database` must be provided either in the config or per query — PostgreSQL requires a database to connect.
 
 **SQLite**
 

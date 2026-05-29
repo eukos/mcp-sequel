@@ -15,8 +15,8 @@ from mcp_sequel.tunnel import close_tunnel, open_tunnel
 class MySQLAdapter(BaseAdapter):
     ALLOWED_STATEMENTS = frozenset({"SELECT", "SHOW", "DESCRIBE", "EXPLAIN", "USE"})
 
-    def __init__(self, config: Any) -> None:
-        super().__init__(config)
+    def __init__(self, config: Any, database: str | None = None) -> None:
+        super().__init__(config, database)
         self.sqlglot_dialect = config.type  # "mysql" or "mariadb"
         self._tunnel: Any = None
 

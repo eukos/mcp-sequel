@@ -55,8 +55,33 @@ class SQLiteConfig(BaseConnectionConfig):
         return self.path
 
 
+class PostgreSQLConfig(BaseConnectionConfig):
+    type: Literal["postgresql"]
+    host: str
+    port: int = 5432
+    database: str | None = None
+    user: str
+    password: str
+    readonly: bool = True
+    row_limit: int | None = 1000
+    description: str | None = None
+    ssh_tunnel: SSHTunnelConfig | None = None
+
+    @property
+    def location(self) -> str:
+        host = self.host if self.port == 5432 else f"{self.host}:{self.port}"
+        loc = f"{self.user}@{host}"
+        if self.database:
+            loc += f"/{self.database}"
+        if self.ssh_tunnel:
+            ssh = self.ssh_tunnel
+            ssh_host = ssh.host if ssh.port == 22 else f"{ssh.host}:{ssh.port}"
+            loc = f"{ssh.user}@{ssh_host} -> {loc}"
+        return loc
+
+
 ConnectionConfig = Annotated[
-    Union[MySQLConfig, SQLiteConfig],
+    Union[MySQLConfig, SQLiteConfig, PostgreSQLConfig],
     Field(discriminator="type"),
 ]
 
