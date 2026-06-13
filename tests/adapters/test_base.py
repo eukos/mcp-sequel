@@ -3,7 +3,7 @@ import decimal
 
 import pytest
 
-from mcp_sequel.adapters.base import _serialize
+from mcp_sequel.adapters.base import BaseAdapter, _serialize
 
 
 @pytest.mark.parametrize(
@@ -27,4 +27,35 @@ from mcp_sequel.adapters.base import _serialize
     ],
 )
 def test_serialize(value, expected):
+    assert _serialize(value) == expected
+
+
+@pytest.mark.parametrize(
+    "conn_name, database, cfg",
+    [
+        ("myconn", None, None),
+        ("myconn", "shop", None),
+        ("myconn", "blog", object()),
+    ],
+)
+def test_make_pool_key_default_returns_conn_name(conn_name, database, cfg):
+    assert BaseAdapter.make_pool_key(conn_name, database, cfg) == conn_name
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (
+            __import__("uuid").UUID("12345678-1234-5678-1234-567812345678"),
+            "12345678-1234-5678-1234-567812345678",
+        ),
+        (__import__("ipaddress").IPv4Address("192.168.1.1"), "192.168.1.1"),
+        (__import__("ipaddress").IPv6Address("::1"), "::1"),
+        (__import__("ipaddress").IPv4Network("10.0.0.0/8"), "10.0.0.0/8"),
+        (memoryview(b"\xff\xfe"), "fffe"),
+        ({"key": 1}, {"key": 1}),
+        ([1, 2, 3], [1, 2, 3]),
+    ],
+)
+def test_serialize_postgresql_types(value, expected):
     assert _serialize(value) == expected

@@ -8,7 +8,10 @@ from mcp_sequel.adapters.base import ReadonlyViolationError
 from mcp_sequel.config import load_all
 from mcp_sequel.pool import get_connection
 
-mcp = FastMCP("mcp-sequel", instructions="MySQL and SQLite database query tool")
+mcp = FastMCP(
+    "mcp-sequel",
+    instructions="MySQL, MariaDB, PostgreSQL, and SQLite database query tool",
+)
 
 
 def _is_select_without_limit(sql: str, dialect: str) -> bool:
@@ -58,7 +61,7 @@ def list_connections() -> str:
 def query(connection: str, sql: str, database: str | None = None) -> str:
     """Execute a SQL query on a database connection. Returns JSON with columns, rows, row_count, limit_applied."""
     try:
-        cfg, adapter, conn = get_connection(connection)
+        cfg, adapter, conn = get_connection(connection, database)
 
         if cfg.readonly:
             adapter.guard_readonly(sql)

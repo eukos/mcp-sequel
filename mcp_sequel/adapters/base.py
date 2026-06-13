@@ -1,5 +1,7 @@
 import datetime
 import decimal
+import ipaddress
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
@@ -12,6 +14,20 @@ def _serialize(value: Any) -> Any:
         return str(value)
     if isinstance(value, bytes):
         return value.hex()
+    if isinstance(value, uuid.UUID):
+        return str(value)
+    if isinstance(
+        value,
+        (
+            ipaddress.IPv4Address,
+            ipaddress.IPv6Address,
+            ipaddress.IPv4Network,
+            ipaddress.IPv6Network,
+        ),
+    ):
+        return str(value)
+    if isinstance(value, memoryview):
+        return value.tobytes().hex()
     return value
 
 
@@ -31,8 +47,12 @@ class BaseAdapter(ABC):
     ALLOWED_STATEMENTS: frozenset[str] = frozenset()
     sqlglot_dialect: str = ""
 
-    def __init__(self, config: Any) -> None:
+    def __init__(self, config: Any, database: str | None = None) -> None:
         self.config = config
+
+    @classmethod
+    def make_pool_key(cls, conn_name: str, database: str | None, cfg: Any) -> str:
+        return conn_name
 
     def guard_readonly(self, sql: str) -> None:
         # No-op by default. Two strategies exist:
@@ -51,4 +71,3 @@ class BaseAdapter(ABC):
 
     @abstractmethod
     def close(self, conn: Any) -> None: ...
-
