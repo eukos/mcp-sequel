@@ -8,7 +8,10 @@ from mcp_sequel.adapters.base import ReadonlyViolationError
 from mcp_sequel.config import load_all
 from mcp_sequel.pool import get_connection
 
-mcp = FastMCP("mcp-sequel", instructions="MySQL and SQLite database query tool")
+mcp = FastMCP(
+    "mcp-sequel",
+    instructions="MySQL, MariaDB, PostgreSQL, and SQLite database query tool",
+)
 
 
 def _is_select_without_limit(sql: str, dialect: str) -> bool:
