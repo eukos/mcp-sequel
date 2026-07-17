@@ -94,6 +94,24 @@ def test_execute_empty_result(adapter):
     assert result.row_count == 0
 
 
+def test_execute_applies_default_timeout(adapter):
+    conn, _ = _make_conn(None, [])
+
+    adapter.execute(conn, "SELECT 1", None)
+
+    assert conn._read_timeout == 60
+    assert conn._write_timeout == 60
+
+
+def test_execute_applies_explicit_timeout(adapter):
+    conn, _ = _make_conn(None, [])
+
+    adapter.execute(conn, "SELECT 1", None, timeout=5)
+
+    assert conn._read_timeout == 5
+    assert conn._write_timeout == 5
+
+
 # --- tunnel integration ---
 
 

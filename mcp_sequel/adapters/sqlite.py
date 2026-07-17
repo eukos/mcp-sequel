@@ -19,7 +19,11 @@ class SQLiteAdapter(BaseAdapter):
         return True
 
     def execute(
-        self, conn: sqlite3.Connection, sql: str, database: str | None
+        self,
+        conn: sqlite3.Connection,
+        sql: str,
+        database: str | None,
+        timeout: int = 60,
     ) -> QueryResult:
         cursor = conn.execute(sql)
         columns = [desc[0] for desc in cursor.description] if cursor.description else []

@@ -57,7 +57,9 @@ class PostgreSQLAdapter(BaseAdapter):
         conn.execute("SELECT 1")
         return True
 
-    def execute(self, conn: Any, sql: str, database: str | None) -> QueryResult:
+    def execute(
+        self, conn: Any, sql: str, database: str | None, timeout: int = 60
+    ) -> QueryResult:
         if database is not None and database != self._database:
             raise RuntimeError(
                 f"PostgreSQL does not support switching databases mid-connection "

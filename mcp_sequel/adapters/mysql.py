@@ -58,7 +58,11 @@ class MySQLAdapter(BaseAdapter):
         conn.ping(reconnect=True)
         return True
 
-    def execute(self, conn: Any, sql: str, database: str | None) -> QueryResult:
+    def execute(
+        self, conn: Any, sql: str, database: str | None, timeout: int = 60
+    ) -> QueryResult:
+        conn._read_timeout = timeout
+        conn._write_timeout = timeout
         cursor = conn.cursor()
         try:
             if database is not None:
