@@ -58,8 +58,14 @@ def list_connections() -> str:
 
 
 @mcp.tool()
-def query(connection: str, sql: str, database: str | None = None) -> str:
-    """Execute a SQL query on a database connection. Returns JSON with columns, rows, row_count, limit_applied."""
+def query(
+    connection: str, sql: str, database: str | None = None, timeout: int = 60
+) -> str:
+    """Execute a SQL query on a database connection. Returns JSON with columns, rows, row_count, limit_applied.
+
+    timeout: max seconds to wait for the query to complete (default 60). Raise this
+    for known-heavy queries. Currently enforced for MySQL/MariaDB connections only.
+    """
     try:
         cfg, adapter, conn = get_connection(connection, database)
 
@@ -74,7 +80,7 @@ def query(connection: str, sql: str, database: str | None = None) -> str:
             actual_sql = sql.rstrip().rstrip(";") + f" LIMIT {cfg.row_limit}"
             limit_applied = cfg.row_limit
 
-        result = adapter.execute(conn, actual_sql, database)
+        result = adapter.execute(conn, actual_sql, database, timeout)
         result.limit_applied = limit_applied
 
         return json.dumps(
