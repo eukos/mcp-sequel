@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.0] - 2026-10-25
+
+### Changed
+- Migrated to the MCP Python SDK v2 (`mcp>=2,<3`): `FastMCP` replaced by `MCPServer` (#31).
+
+### Fixed
+- Queries are serialized and SQLite connections can be used across threads, because SDK v2 runs synchronous tools in worker threads (previously a shared pooled connection could fail with "SQLite objects created in a thread can only be used in that same thread" on concurrent calls).
+
 ## [0.2.2] - 2026-07-31
 
 ### Fixed

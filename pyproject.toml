@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-sequel"
-version = "0.2.2"
+version = "0.3.0rc1"
 description = "MCP server for Claude that connects to MySQL, MariaDB, PostgreSQL, and SQLite databases"
 readme = "README.md"
 authors = [{ name = "Eugene Kosyakov", email = "eukos@yandex.by" }]
@@ -15,7 +15,7 @@ classifiers = [
 ]
 keywords = ["mcp", "mysql", "mariadb", "postgresql", "sqlite", "claude", "llm", "ai"]
 dependencies = [
-    "mcp[cli]>=1.28,<2",
+    "mcp[cli]>=2,<3",
     "pymysql>=1.2",
     "sqlglot>=20.0",
     "pydantic>=2.0",
