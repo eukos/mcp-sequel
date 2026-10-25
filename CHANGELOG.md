@@ -11,6 +11,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Queries are serialized and SQLite connections can be used across threads, because SDK v2 runs synchronous tools in worker threads (previously a shared pooled connection could fail with "SQLite objects created in a thread can only be used in that same thread" on concurrent calls).
 
+### Security
+- Upgraded vulnerable transitive dependencies and set minimum versions so unlocked installs (`uvx`) cannot resolve them: `pyjwt>=2.15.0`, `anyio>=4.14.2`, `cryptography>=50.0.0`.
+
 ## [0.2.2] - 2026-07-31
 
 ### Fixed
