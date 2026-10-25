@@ -21,6 +21,11 @@ dependencies = [
     "pydantic>=2.0",
     "paramiko>=5.0",
     "psycopg[binary]>=3.3.4",
+    # Floors for transitive deps with known vulnerabilities, so unlocked installs
+    # (uvx) never resolve a vulnerable version.
+    "pyjwt>=2.15.0",
+    "anyio>=4.14.2",
+    "cryptography>=50.0.0",
 ]
 
 [project.urls]
