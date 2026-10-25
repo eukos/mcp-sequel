@@ -1,14 +1,19 @@
 import json
+import threading
 from importlib.metadata import PackageNotFoundError, version
 
 import sqlglot
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from mcp_sequel.adapters.base import ReadonlyViolationError
 from mcp_sequel.config import load_all
 from mcp_sequel.pool import get_connection
 
-mcp = FastMCP(
+# MCP SDK v2 runs sync tools in worker threads; pooled connections are shared
+# and not thread-safe, so serialize queries (v1 did this implicitly).
+_query_lock = threading.Lock()
+
+mcp = MCPServer(
     "mcp-sequel",
     instructions="MySQL, MariaDB, PostgreSQL, and SQLite database query tool",
 )
@@ -67,35 +72,40 @@ def query(
     for known-heavy queries. Currently enforced for MySQL/MariaDB connections only.
     """
     try:
-        cfg, adapter, conn = get_connection(connection, database)
-
-        if cfg.readonly:
-            adapter.guard_readonly(sql)
-
-        actual_sql = sql
-        limit_applied = None
-        if cfg.row_limit is not None and _is_select_without_limit(
-            sql, adapter.sqlglot_dialect
-        ):
-            actual_sql = sql.rstrip().rstrip(";") + f" LIMIT {cfg.row_limit}"
-            limit_applied = cfg.row_limit
-
-        result = adapter.execute(conn, actual_sql, database, timeout)
-        result.limit_applied = limit_applied
-
-        return json.dumps(
-            {
-                "columns": result.columns,
-                "rows": result.rows,
-                "row_count": result.row_count,
-                "limit_applied": result.limit_applied,
-            },
-            ensure_ascii=False,
-        )
+        with _query_lock:
+            return _run_query(connection, sql, database, timeout)
     except ReadonlyViolationError as e:
         return f"ERROR: readonly violation: {e}"
     except Exception as e:
         return f"ERROR: {e}"
+
+
+def _run_query(connection: str, sql: str, database: str | None, timeout: int) -> str:
+    cfg, adapter, conn = get_connection(connection, database)
+
+    if cfg.readonly:
+        adapter.guard_readonly(sql)
+
+    actual_sql = sql
+    limit_applied = None
+    if cfg.row_limit is not None and _is_select_without_limit(
+        sql, adapter.sqlglot_dialect
+    ):
+        actual_sql = sql.rstrip().rstrip(";") + f" LIMIT {cfg.row_limit}"
+        limit_applied = cfg.row_limit
+
+    result = adapter.execute(conn, actual_sql, database, timeout)
+    result.limit_applied = limit_applied
+
+    return json.dumps(
+        {
+            "columns": result.columns,
+            "rows": result.rows,
+            "row_count": result.row_count,
+            "limit_applied": result.limit_applied,
+        },
+        ensure_ascii=False,
+    )
 
 
 def main():

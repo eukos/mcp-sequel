@@ -11,8 +11,8 @@ class SQLiteAdapter(BaseAdapter):
         path = self.config.path
         if self.config.readonly:
             uri = f"file:{path}?mode=ro"
-            return sqlite3.connect(uri, uri=True)
-        return sqlite3.connect(path)
+            return sqlite3.connect(uri, uri=True, check_same_thread=False)
+        return sqlite3.connect(path, check_same_thread=False)
 
     def ping(self, conn: sqlite3.Connection) -> bool:
         conn.execute("SELECT 1")
